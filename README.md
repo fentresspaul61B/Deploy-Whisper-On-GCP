@@ -170,6 +170,69 @@ async def translate(file: UploadFile = File(...)):
 
 How this works: 
 
+## Testing with Docker Locally
+### Create the docker file
+
+### Build the docker image
+```
+docker build -t my-fastapi-app .
+
+docker run -p 8080:8080 my-fastapi-app --name my-fastapi-container
+
+# View the API now running within docker and test it again:
+http://localhost:8080/docs
+
+# Incase you want to delete the container, run:
+docker rm -f /my-fastapi-container
+```
+
+## Deploying on Cloud Run
+
+### Adding GPU Checks
+Before deploying onto cloud run, I want to add a helper function, which can be used to validate if the GPU is connected and working.
+
+```python
+@app.post("/check-gpu/")
+async def check_gpu():
+    if not torch.cuda.is_available():
+        raise HTTPException(status_code=400, detail="CUDA is not available")
+    return {"cuda": True}
+```
+
+### Deploy without GPU first (GitHub Actions)
+
+There is a premade GitHub actions which can be used to deploy Cloud Run, which I would normally use; however, since cloud run with GPU on cloud run is a relatively feature, it is not yet supported with GitHub workflow. Therefore, this requires us to build the docker image and push the image to the artifact registry in GCP, through the GCP SDK. To Do this, we can use GitHub actions to run automated deployment scripts.
+
+Deploy on cloud run can be somewhat involved, as it requires:
+- Service accounts
+- GitHub secrets
+- Setting budget alerts
+I have documented all these steps already in this repo: 
+https://github.com/fentresspaul61B/Deploy-API-with-Large-Files-GCP-Cloud-Run
+
+For the sake of brevity I will include the steps required, and not touch on the ones that are not required (like setting budget alerts). However, 
+
+I suggest to eventually add budget alerts, as using APIs on GCP can lead to unexpected bills when mistakes are made, leading to large bills, and this is compounded by the fact we are also adding a GPU server instance. 
+
+### Create new service account
+Add these permissions:
+
+| **Role Name**                     | **Description**                                                                                                             |
+|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| **Storage Object Viewer**         |    Grants access to agent to download and list items in a bucket.                                                           |
+| **Service Account User**          |    Required for deploying to Cloud Run; allows the deploying service account to act as the runtime service account.         |
+| **Cloud Run Developer**           |    Grants the agent access to deploy the API to Google Cloud Run.                                                           |
+| **Artifact Registry Create-on-Push Writer**      |    Used to create an artifact, which is the stored Docker image in GCP.                                                     |
+
+Create a new GitHub actions secret and name it: GCP_CREDENTIALS
+Also add your GCP project ID: and name it GCP_PROJECT_ID.
+
+### Checking CPU response times
+
+### Creating GitHub Actions Workflow for deployment
+https://cloud.google.com/run/docs/configuring/services/gpu#gcloud
+
+
 
 
 
