@@ -52,7 +52,7 @@ jobs:
             --image gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --cpu 4 \
-            --memory 8Gi \
+            --memory 16Gi \
             --timeout 60 \
             --gpu 1 \
             --gpu-type nvidia-l4 \
