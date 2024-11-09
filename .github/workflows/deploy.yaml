@@ -53,6 +53,6 @@ jobs:
             --max-instances 1 \ 
             --region ${{ env.REGION }} \
             --cpu 8 \
-            --memory 24 Gi \
+            --memory 24Gi \
             --quiet
     
