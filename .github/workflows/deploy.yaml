@@ -28,6 +28,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
+          install_components: beta
       
       - name: Who am I?
         run: |
