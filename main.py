@@ -6,9 +6,17 @@ import shutil
 import os
 import torch
 
+# POSSIBLE VERSIONS
+# https://github.com/openai/whisper/tree/main
+# 'tiny.en', 'tiny', 'base.en', 'base', 'small.en',
+# 'small', 'medium.en', 'medium', 'large-v1', 'large-v2',
+# 'large-v3', 'large', 'large-v3-turbo', 'turbo'
+MODEL_VERSION = "tiny"
+# V3 models require 128, other models require 80
+NUM_MELS = 80
 
 app = FastAPI()
-MODEL = whisper.load_model("turbo")
+MODEL = whisper.load_model(MODEL_VERSION)
 
 
 def save_upload_file_to_temp(upload_file: UploadFile) -> str:
@@ -50,7 +58,7 @@ async def translate(file: UploadFile = File(...)):
     try:
         audio = whisper.load_audio(temp_filepath)
         audio = whisper.pad_or_trim(audio)
-        mel = whisper.log_mel_spectrogram(audio, n_mels=128).to(MODEL.device)
+        mel = whisper.log_mel_spectrogram(audio, n_mels=NUM_MELS).to(MODEL.device)
         result = whisper.decode(MODEL, mel)
     finally:
         os.remove(temp_filepath)

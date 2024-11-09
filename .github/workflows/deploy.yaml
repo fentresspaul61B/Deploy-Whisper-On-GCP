@@ -53,5 +53,6 @@ jobs:
             --region ${{ env.REGION }} \
             --cpu 4 \
             --memory 8Gi \
+            --timeout 60 \
             --quiet
     
