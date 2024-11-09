@@ -54,5 +54,8 @@ jobs:
             --cpu 4 \
             --memory 8Gi \
             --timeout 60 \
+            --gpu 1 \
+            --gpu-type nvidia-l4 \
+            --max-instances 1 \
             --quiet
     

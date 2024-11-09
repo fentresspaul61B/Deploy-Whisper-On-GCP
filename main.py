@@ -58,7 +58,8 @@ async def translate(file: UploadFile = File(...)):
     try:
         audio = whisper.load_audio(temp_filepath)
         audio = whisper.pad_or_trim(audio)
-        mel = whisper.log_mel_spectrogram(audio, n_mels=NUM_MELS).to(MODEL.device)
+        mel = whisper.log_mel_spectrogram(
+            audio, n_mels=NUM_MELS).to(MODEL.device)
         result = whisper.decode(MODEL, mel)
     finally:
         os.remove(temp_filepath)
