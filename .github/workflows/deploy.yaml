@@ -51,5 +51,6 @@ jobs:
           gcloud beta run deploy ${{ env.SERVICE_NAME }} \
             --image gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
+            --cpu 8 \
             --memory 32Gi \
             --quiet
