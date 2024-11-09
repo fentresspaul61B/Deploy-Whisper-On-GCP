@@ -52,6 +52,6 @@ jobs:
             --image gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --cpu 4 \
-            --memory 4Gi \
+            --memory 8Gi \
             --quiet
     
