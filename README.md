@@ -3,6 +3,10 @@ In this example, I will document the steps to deploy the open AI whisper SOTA ST
 
 This is useful incase you want to ensure your data is stored on specific servers you are in control of. 
 
+## IMPORTANT NOTES
+- You will need to request GPU access from GCP which can take up to 2 days for approval in order to deploy using GPU on cloud run. (ADD STEPS ON HOW TO DO THIS FIRST)
+- Inference using the different whisper models on CPU, will be extremely slow, and basically not useful for most cases.
+
 
 
 ## Steps
@@ -229,8 +233,39 @@ Also add your GCP project ID: and name it GCP_PROJECT_ID.
 
 ### Checking CPU response times
 
+Grab token from gcloud
+```
+gcloud auth print-identity-token
+```
+
+Navigate to postman:
+- Switch the setting to "POST"
+- Change to the form data
+- Change to value to "file"
+- Add the key to be "file"
+- Then select to upload a test file
+- Add token to bearer token
+- Send
+
+Also can check GPU and FFMPEG endpoints
+
+There will be a long cold start time, as the model will take a while to load each time. 
+
 ### Creating GitHub Actions Workflow for deployment
 https://cloud.google.com/run/docs/configuring/services/gpu#gcloud
+
+- Go to cloud run admin API
+- Go to Quotas and system limits
+- Search for "Total Nvidia L4 GPU allocation, per project per region" and find your region
+- Click the box
+- Hit edit
+- Fill out the request information
+
+Otherwise you will get this error: 
+```
+ERROR: (gcloud.beta.run.deploy) spec.template.spec.node_selector: This project must be allowed to access instances with attached GPU. Please request the GPU access by requesting a quota via your cloud console.
+```
+
 
 
 
