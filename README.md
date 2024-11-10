@@ -5,8 +5,7 @@ This is useful incase you want to ensure your data is stored on specific servers
 
 ## IMPORTANT NOTES
 - You will need to request GPU access from GCP which can take up to 2 days for approval in order to deploy using GPU on cloud run. (ADD STEPS ON HOW TO DO THIS FIRST)
-- Inference using the different whisper models on CPU, will be extremely slow, and basically not useful for most cases.
-
+- Inference using the different whisper models on CPU, will be extremely slow, and basically not useful for most cases
 
 
 ## Steps
