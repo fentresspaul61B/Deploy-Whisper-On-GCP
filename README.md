@@ -295,6 +295,76 @@ Otherwise you will get this error:
 ERROR: (gcloud.beta.run.deploy) spec.template.spec.node_selector: This project must be allowed to access instances with attached GPU. Please request the GPU access by requesting a quota via your cloud console.
 ```
 
+Workflow:
+```YAML
+name: Deploy to Cloud Run (WITH GPU)
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: "us-central1"
+  SERVICE_NAME: whisper-translate-gpu
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          install_components: beta
+      
+      - name: Authenticate Docker with Google Container Registry
+        run: gcloud auth configure-docker
+
+      - name: Build Docker Image
+        run: |
+          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} -f Dockerfile .
+
+      - name: Push Docker Image
+        run: |
+          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run (WITH GPU)
+        run: |
+          gcloud beta run deploy ${{ env.SERVICE_NAME }} \
+            --image gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --cpu 4 \
+            --memory 16Gi \
+            --timeout 60 \
+            --gpu 1 \
+            --gpu-type nvidia-l4 \
+            --max-instances 1 \
+            --quiet
+```
+Explanation
+
+The way the workflow works, is as follows:
+- Gets the secrets from GitHub and sets them as env variables, this includes the GCP Auth JSON which has been encoded as base64, and the name of the GCP project. 
+- Then we checkout the most recent version of the code. 
+- Authenticate with GCP, in the GitHub actions env, which is required to deploy to GCP from the GitHub actions servers. 
+- Install the GCP SDK, which allows to run commands for pushing docker images using CLI commands to GCP artifact registry. 
+- Build the docker image
+- Push the docker image to the artifact registry 
+- Now deploy the service using GCP cloud run, but point to the new container that exists in the artifact registry. Making sure to configure settings to allow for GPU usage. 
+
+
 
 
 
