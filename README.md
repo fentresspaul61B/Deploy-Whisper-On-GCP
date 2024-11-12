@@ -7,6 +7,7 @@ This is useful incase you want to ensure your data is stored on specific servers
 - You will need to request GPU access from GCP which can take up to 2 days for approval in order to deploy using GPU on cloud run. (ADD STEPS ON HOW TO DO THIS FIRST). For me this took about 4 businesses days. With that being said, GCP was very responsive, and gave me a status update almost every day which was helpful.
 - Inference using the different whisper models on CPU, will be extremely slow, and basically not useful for most cases
 - The cost of running the GPU is based on time that the server is live, so its in your best interest to have the service scale to 0, otherwise, the cost of the GPU comes out to about 20$ a day if it is running the entire time. 
+- Another important note, is that it will cost a few cents a day, just to store the container image in the artifact registry. So if you need your costs to go fully down to 0, make sure to delete the image in the artifact registry. Deleting the cloud run API will not delete the image automatically. 
 
 
 ## Steps
@@ -176,6 +177,34 @@ How this works:
 
 ## Testing with Docker Locally
 ### Create the docker file
+The two most important parts of the docker file, is that we use an image which loads CUDA, which is required for accessing the GPU. The second important part, is that our image has FFMPEG, which is an open source, highly capable, general purpose audio and video processing software, which is required often when working with audio data. 
+```Dockerfile
+
+FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the requirements file into the container
+COPY requirements.txt .
+
+# Install the required packages
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install ffmpeg
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the application code into the container
+COPY main.py .
+
+# Expose port 8080
+EXPOSE 8080
+
+# Command to run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+```
 
 ### Build the docker image
 ```

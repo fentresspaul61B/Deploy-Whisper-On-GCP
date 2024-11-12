@@ -11,9 +11,9 @@ import torch
 # 'tiny.en', 'tiny', 'base.en', 'base', 'small.en',
 # 'small', 'medium.en', 'medium', 'large-v1', 'large-v2',
 # 'large-v3', 'large', 'large-v3-turbo', 'turbo'
-MODEL_VERSION = "tiny"
-# V3 models require 128, other models require 80
-NUM_MELS = 80
+MODEL_VERSION = "large-v3-turbo"
+# V3 models require 128 mel, other models like the tiny model require 80 mels
+NUM_MELS = 128
 
 app = FastAPI()
 MODEL = whisper.load_model(MODEL_VERSION)
