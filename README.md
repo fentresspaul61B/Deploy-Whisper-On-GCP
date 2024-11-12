@@ -4,7 +4,7 @@ In this example, I will document the steps to deploy the open AI whisper SOTA ST
 This is useful incase you want to ensure your data is stored on specific servers you are in control of. 
 
 ## IMPORTANT NOTES
-- You will need to request GPU access from GCP which can take up to 2 days for approval in order to deploy using GPU on cloud run. (ADD STEPS ON HOW TO DO THIS FIRST)
+- You will need to request GPU access from GCP which can take up to 2 days for approval in order to deploy using GPU on cloud run. (ADD STEPS ON HOW TO DO THIS FIRST). For me this took about 4 businesses days. With that being said, GCP was very responsive, and gave me a status update almost every day which was helpful.
 - Inference using the different whisper models on CPU, will be extremely slow, and basically not useful for most cases
 
 
