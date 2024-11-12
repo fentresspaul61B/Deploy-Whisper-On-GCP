@@ -6,6 +6,7 @@ This is useful incase you want to ensure your data is stored on specific servers
 ## IMPORTANT NOTES
 - You will need to request GPU access from GCP which can take up to 2 days for approval in order to deploy using GPU on cloud run. (ADD STEPS ON HOW TO DO THIS FIRST). For me this took about 4 businesses days. With that being said, GCP was very responsive, and gave me a status update almost every day which was helpful.
 - Inference using the different whisper models on CPU, will be extremely slow, and basically not useful for most cases
+- The cost of running the GPU is based on time that the server is live, so its in your best interest to have the service scale to 0, otherwise, the cost of the GPU comes out to about 20$ a day if it is running the entire time. 
 
 
 ## Steps
