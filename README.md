@@ -90,12 +90,49 @@ For loading the audio into our API, we will utlize the fast API upload file meth
 
 
 ```python
-# API file upload code:
-from fastapi import FastAPI, File, UploadFile
+import whisper
+from fastapi import FastAPI, File, UploadFile, HTTPException
 import subprocess
+import tempfile
+import shutil
+import os
+import torch
+
+# POSSIBLE VERSIONS
+# https://github.com/openai/whisper/tree/main
+# 'tiny.en', 'tiny', 'base.en', 'base', 'small.en',
+# 'small', 'medium.en', 'medium', 'large-v1', 'large-v2',
+# 'large-v3', 'large', 'large-v3-turbo', 'turbo'
+MODEL_VERSION = "large-v3-turbo"
+
+# V3 models require 128 mel, other models like the tiny model require 80 mels
+NUM_MELS = 128
+
+app = FastAPI()
+
+# Model loaded in docker file.
+MODEL_PATH = f"/app/models/{MODEL_VERSION}.pt"
+MODEL = whisper.load_model(MODEL_PATH)
 
 
-def check_ffmpeg():
+def save_upload_file_to_temp(upload_file: UploadFile) -> str:
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        upload_file.file.seek(0)
+        shutil.copyfileobj(upload_file.file, temp_file)
+        temp_file_path = temp_file.name
+    return temp_file_path
+
+
+@app.post("/check-gpu/")
+async def check_gpu():
+    if not torch.cuda.is_available():
+        raise HTTPException(status_code=400, detail="CUDA is not available")
+    return {"cuda": True}
+
+
+@app.post("/check-ffmpeg/")
+async def check_ffmpeg():
+    ffmpeg = True
     try:
         subprocess.run(
             ["ffmpeg", "-version"],
@@ -103,25 +140,32 @@ def check_ffmpeg():
             text=True,
             check=True
         )
-        return True
-    except subprocess.CalledProcessError:
-        return False
-    except FileNotFoundError:
-        return False
+    except Exception as e:
+        print(e)
+        ffmpeg = False
+    if not ffmpeg:
+        raise HTTPException(status_code=400, detail="FFMPEG is not available")
+    return {"ffmpeg": True}
 
 
-app = FastAPI()
+@app.post("/check-model-in-memory/")
+async def check_model_in_memory():
+    """Verifies if model was loaded during docker build."""
+    return {"contents": os.listdir("/app/models/")}
 
 
-@app.post("/upload-audio/")
-async def create_upload_file(file: UploadFile = File(...)):
-    content = await file.read()
-    response = {
-        "filename": file.filename, 
-        "content_size": len(content),
-        "ffmpeg": check_ffmpeg()
-    }
-    return response
+@app.post("/translate/")
+async def translate(file: UploadFile = File(...)):
+    temp_filepath = save_upload_file_to_temp(file)
+    try:
+        audio = whisper.load_audio(temp_filepath)
+        audio = whisper.pad_or_trim(audio)
+        mel = whisper.log_mel_spectrogram(
+            audio, n_mels=NUM_MELS).to(MODEL.device)
+        result = whisper.decode(MODEL, mel)
+    finally:
+        os.remove(temp_filepath)
+    return {"text": result.text, "language": result.language}
 ```
 
 Check the api locally in development mode: 
@@ -402,7 +446,7 @@ A few important things to consider along the way:
 - Whisper will not be useful without a GPU. During this project, I initially tried running whisper on CPU just for testing purposes, and it took 30 seconds - a few minutes to process audio samples that were only around 10-15 seconds long. When I switched to GPU, the entire API response time were < 1 second, which is decent considering the whisper API takes around () seconds. 
 - Overall, the GCP deployed API has faster more consistent api response times. The average response times for this example of 25 requests for GCP is 0.83 seconds, while for OpenAI it is 1.75, so on average GCP was twice as fast. 
 - If the cost for OpenAI is based on the time to receive a response, than the unpredictable and slower response times actually brings the cost of the self hosted GCP API much closer to the OpenAI API, where the cost of this experiment on GCP cost 0.004898 dollars and for OpenAI it cost 0.004385 dollars. 
-- Make sure to consider the memory limits of GCP Cloud Run. For example, if you would like to deploy an LLM using cloud run, it may or may not have enough memory given that the max is 32Gi. 
+- Make sure to consider the memory limits of GCP Cloud Run. For example, if you would like to deploy an LLM using cloud run, it may or may not have enough memory given that the max is 32Gi.
 
 
 
