@@ -1,7 +1,7 @@
 # Deploy-Whisper-On-GCP
 In this example, I will document the steps to deploy the open AI whisper SOTA STT model on GCP cloud run with Docker. 
 
-This is useful incase you want to ensure your data is stored on specific servers you are in control of, also, I found that given you are not experiencing a cold start, deploying whisper on GCP cloud run has generally faster and more predictable response times. 
+This is useful incase you want to ensure your data is stored on specific servers you are in control of, also, I found that given you are not experiencing a cold start, deploying whisper on GCP cloud run has generally faster and more predictable response times. GCP Cloud Run is more than twice the price compared to OpenAI API; however, this may be balanced based on the longer response times from OpenAI. 
 
 ![Alt text](whisper_stt_times.png)
 
