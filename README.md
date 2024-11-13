@@ -178,33 +178,36 @@ How this works:
 ## Testing with Docker Locally
 ### Create the docker file
 The two most important parts of the docker file, is that we use an image which loads CUDA, which is required for accessing the GPU. The second important part, is that our image has FFMPEG, which is an open source, highly capable, general purpose audio and video processing software, which is required often when working with audio data. 
-```Dockerfile
 
+```Dockerfile
+# Updated Dockerfile which loads model in mem.
 FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
-# Set the working directory in the container
+
 WORKDIR /app
 
-# Copy the requirements file into the container
 COPY requirements.txt .
 
-# Install the required packages
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install ffmpeg
+RUN mkdir models
+
+ENV MODEL_VERSION=large-v3-turbo
+RUN mkdir -p /app/models && \
+    python -c "import whisper; whisper.load_model('$MODEL_VERSION', download_root='/app/models')"
+
 RUN apt-get update && \
     apt-get install -y ffmpeg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy the application code into the container
 COPY main.py .
 
-# Expose port 8080
 EXPOSE 8080
 
-# Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
 ```
+The reason to load the model into memory in the container, is so that when the API scales down to 0, the model does not have to be reloaded in memory each time, which can take a minute, but rather, it will exist already when the server starts. So although this will not stop cold starts from happening, it will make the cold starts less bad. 
+
 
 ### Build the docker image
 ```BASH
