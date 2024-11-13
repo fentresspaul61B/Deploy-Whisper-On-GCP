@@ -192,44 +192,6 @@ This will make a request to the API, the output should be something like so:
 }
 ```
 
-## STT Python Code
-Now that we verified that a simple API is working locally, lets add the STT python code from the example on the open AIs GitHub and add it to the API. 
-
-```python
-import whisper
-from fastapi import FastAPI, File, UploadFile
-import tempfile
-import shutil
-import os
-
-
-def save_upload_file_to_temp(upload_file: UploadFile) -> str:
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        upload_file.file.seek(0)
-        shutil.copyfileobj(upload_file.file, temp_file)
-        temp_file_path = temp_file.name
-    return temp_file_path
-
-
-app = FastAPI()
-MODEL = whisper.load_model("turbo")
-
-
-@app.post("/translate/")
-async def translate(file: UploadFile = File(...)):
-    temp_filepath = save_upload_file_to_temp(file)
-    audio = whisper.load_audio(temp_filepath)  # Returns np.array
-    audio = whisper.pad_or_trim(audio)  # Fixes np.array shape
-    # make log-Mel spectrogram and move to the same device as the model
-    mel = whisper.log_mel_spectrogram(audio, n_mels=128).to(MODEL.device)
-    options = whisper.DecodingOptions()  # This is empty, but a required param.
-    result = whisper.decode(MODEL, mel, options)
-    os.remove(temp_filepath)
-    return {"text": result.text, "language": result.language}
-```
-
-How this works: 
-
 ## Testing with Docker Locally
 ### Create the docker file
 The two most important parts of the docker file, is that we use an image which loads CUDA, which is required for accessing the GPU. The second important part, is that our image has FFMPEG, which is an open source, highly capable, general purpose audio and video processing software, which is required often when working with audio data. 
