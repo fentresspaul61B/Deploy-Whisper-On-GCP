@@ -8,10 +8,18 @@ This is useful incase you want to ensure your data is stored on specific servers
 
 ## IMPORTANT NOTES
 - You will need to request GPU access from GCP which can take up to 2 days for approval in order to deploy using GPU on cloud run. (ADD STEPS ON HOW TO DO THIS FIRST). For me this took about 4 businesses days. With that being said, GCP was very responsive, and gave me a status update almost every day which was helpful.
-- Inference using the different whisper models on CPU, will be extremely slow, and basically not useful for most cases
-- The cost of running the GPU is based on time that the server is live, so its in your best interest to have the service scale to 0, otherwise, the cost of the GPU comes out to about 20$ a day if it is running the entire time. 
-- Another important note, is that it will cost a few cents a day, just to store the container image in the artifact registry. So if you need your costs to go fully down to 0, make sure to delete the image in the artifact registry. Deleting the cloud run API will not delete the image automatically. 
+- Inference using the different whisper models on CPU, will be extremely slow, and basically not useful for most cases. 
+- Whisper Cost: $0.006 / minute (rounded to the nearest second)
+- GCP Cloud Run API with GPU Cost: $0.014 / minute
+- Overall, the GCP deployed API has faster more consistent api response times. The average response times for this example of 25 requests for GCP is 0.83 seconds, while for OpenAI it is 1.75, so on average GCP was twice as fast. 
+- It will cost a few cents a day, just to store the container image in the artifact registry in GCP. So if you need your costs to go fully down to 0, make sure to delete the image in the artifact registry. Deleting the cloud run API will not delete the image automatically. 
 
+### Closing Intro Notes
+Hosting whisper on GCP Cloud Run will cost more; however, the response times are faster and more consistent. GCP will allow more flexibility for server location and privacy of user data. There will be cold start times while hosting on GCP Cloud Run. 
+
+Its important to consider the scale at which you plan to use the whisper API, if you plan having fewer users, privacy is important, and you require faster response times, GCP Cloud Run may be the better solution. If you plan on having many users, but can have variable response times, and privacy is not of concern, than the OpenAI API is the better solution. 
+
+This documentation is a WIP!
 
 ## Steps
 
