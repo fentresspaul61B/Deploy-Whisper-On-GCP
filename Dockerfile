@@ -1,6 +1,7 @@
 # Use an official Python runtime as a parent image
 # FROM python:3.10
 FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
+
 # Set the working directory in the container
 WORKDIR /app
 
