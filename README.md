@@ -1,7 +1,10 @@
 # Deploy-Whisper-On-GCP
 In this example, I will document the steps to deploy the open AI whisper SOTA STT model on GCP cloud run with Docker. 
 
-This is useful incase you want to ensure your data is stored on specific servers you are in control of. 
+This is useful incase you want to ensure your data is stored on specific servers you are in control of, also, I found that given you are not experiencing a cold start, deploying whisper on GCP cloud run has generally faster and more predictable response times. 
+
+![Alt text](whisper_stt_times.png)
+
 
 ## IMPORTANT NOTES
 - You will need to request GPU access from GCP which can take up to 2 days for approval in order to deploy using GPU on cloud run. (ADD STEPS ON HOW TO DO THIS FIRST). For me this took about 4 businesses days. With that being said, GCP was very responsive, and gave me a status update almost every day which was helpful.
@@ -220,8 +223,10 @@ docker run --name whisper-api-container -p 8080:8080 whisper-api
 http://localhost:8080/docs
 
 # Incase you want to delete the container, run:
-docker rm -f /my-fastapi-container
+docker rm -f /whisper-api-container
 ```
+
+The container is about 9Gi of memory after the model is loaded inside.
 
 IMPORTANT NOTE FOR RUNNING DOCKER LOCALLY ON MAC: 
 https://i.sstatic.net/fJ6VG.png
@@ -243,9 +248,9 @@ async def check_gpu():
     return {"cuda": True}
 ```
 
-### Deploy without GPU first (GitHub Actions)
+### Deploy API (GitHub Actions)
 
-There is a premade GitHub actions which can be used to deploy Cloud Run, which I would normally use; however, since cloud run with GPU on cloud run is a relatively feature, it is not yet supported with GitHub workflow. Therefore, this requires us to build the docker image and push the image to the artifact registry in GCP, through the GCP SDK. To Do this, we can use GitHub actions to run automated deployment scripts.
+There is a pre-made GitHub actions workflow which can be used to deploy Cloud Run, which I would normally use; however, since GPU on cloud run is a relatively new feature, it is not yet supported with GitHub workflow. Therefore, this requires us to build the docker image and push the image to the artifact registry in GCP, through the GCP SDK. To Do this, we can use GitHub actions to run automated deployment scripts.
 
 Deploy on cloud run can be somewhat involved, as it requires:
 - Service accounts
@@ -254,7 +259,7 @@ Deploy on cloud run can be somewhat involved, as it requires:
 I have documented all these steps already in this repo: 
 https://github.com/fentresspaul61B/Deploy-API-with-Large-Files-GCP-Cloud-Run
 
-For the sake of brevity I will include the steps required, and not touch on the ones that are not required (like setting budget alerts). However, 
+For the sake of brevity I will include the steps required, and not touch on the ones that are not required (like setting budget alerts). 
 
 I suggest to eventually add budget alerts, as using APIs on GCP can lead to unexpected bills when mistakes are made, leading to large bills, and this is compounded by the fact we are also adding a GPU server instance. 
 
@@ -271,7 +276,7 @@ Add these permissions:
 Create a new GitHub actions secret and name it: GCP_CREDENTIALS
 Also add your GCP project ID: and name it GCP_PROJECT_ID.
 
-### Checking CPU response times
+### Checking API response times
 
 Grab token from gcloud
 ```
@@ -287,9 +292,7 @@ Navigate to postman:
 - Add token to bearer token
 - Send
 
-Also can check GPU and FFMPEG endpoints
-
-There will be a long cold start time, as the model will take a while to load each time. 
+Also can check GPU and FFMPEG endpoints 
 
 ### Creating GitHub Actions Workflow for deployment
 https://cloud.google.com/run/docs/configuring/services/gpu#gcloud
@@ -300,6 +303,7 @@ https://cloud.google.com/run/docs/configuring/services/gpu#gcloud
 - Click the box
 - Hit edit
 - Fill out the request information
+- Wait a few days until you get confirmation that your quota is increased. 
 
 Otherwise you will get this error: 
 ```
@@ -374,6 +378,23 @@ The way the workflow works, is as follows:
 - Build the docker image
 - Push the docker image to the artifact registry 
 - Now deploy the service using GCP cloud run, but point to the new container that exists in the artifact registry. Making sure to configure settings to allow for GPU usage. 
+
+### Talking to GCP quota sales rep
+I asked a few questions to the GCP quota sales rep, which I included:
+
+Q: "If I do not use the GPU all the time, or have a relatively low traffic, as I am just using this for experiments and demos, will I lose access to use the GPU in the future?"
+
+A: "(No) ... Once your quota has been adjusted, it will not decrease nor you will lose access to this. However, it will only affect your future quota increase request with these APIs as our engineers also consider your utilization rate to their evaluation."
+
+# Conclusion
+Overall, my experience deploying Whisper as an API using GCP Cloud Run with a GPU was not too painful. 
+
+A few important things to consider along the way:
+- Cannot get the GPU same day. This can be kind of jarring when you are in the zone making progress on your API, and now have to wait a number of days to move forward. 
+- Whisper will not be useful without a GPU. During this project, I initially tried running whisper on CPU just for testing purposes, and it took 30 seconds - a few minutes to process audio samples that were only around 10-15 seconds long. When I switched to GPU, the entire API response time were < 1 second, which is decent considering the whisper API takes around () seconds. 
+- Overall, the GCP deployed API has faster more consistent api response times. The average response times for this example of 25 requests for GCP is 0.83 seconds, while for OpenAI it is 1.75, so on average GCP was twice as fast. 
+- If the cost for OpenAI is based on the time to receive a response, than the unpredictable and slower response times actually brings the cost of the self hosted GCP API much closer to the OpenAI API, where the cost of this experiment on GCP cost 0.004898 dollars and for OpenAI it cost 0.004385 dollars. 
+- Make sure to consider the memory limits of GCP Cloud Run. For example, if you would like to deploy an LLM using cloud run, it may or may not have enough memory given that the max is 32Gi. 
 
 
 
