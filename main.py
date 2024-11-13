@@ -17,7 +17,10 @@ MODEL_VERSION = "large-v3-turbo"
 NUM_MELS = 128
 
 app = FastAPI()
-MODEL = whisper.load_model(MODEL_VERSION)
+
+# Model loaded in docker file.
+MODEL_PATH = f"/app/models/{MODEL_VERSION}.pt"
+MODEL = whisper.load_model(MODEL_PATH)
 
 
 def save_upload_file_to_temp(upload_file: UploadFile) -> str:
@@ -51,6 +54,12 @@ async def check_ffmpeg():
     if not ffmpeg:
         raise HTTPException(status_code=400, detail="FFMPEG is not available")
     return {"ffmpeg": True}
+
+
+@app.post("/check-model-in-memory/")
+async def check_model_in_memory():
+    """Verifies if model was loaded during docker build."""
+    return {"contents": os.listdir("/app/models/")}
 
 
 @app.post("/translate/")

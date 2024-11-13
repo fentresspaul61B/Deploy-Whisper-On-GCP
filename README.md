@@ -207,10 +207,11 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
 ```
 
 ### Build the docker image
-```
-docker build -t my-fastapi-app .
+```BASH
+docker build -t whisper-api .
 
-docker run -p 8080:8080 my-fastapi-app --name my-fastapi-container
+# Reason for adding the platform flag, is that when trying to run the API locally, it can return a warning saying the base machine does not match what is required to run the container. 
+docker run --name whisper-api-container -p 8080:8080 whisper-api 
 
 # View the API now running within docker and test it again:
 http://localhost:8080/docs
@@ -218,6 +219,13 @@ http://localhost:8080/docs
 # Incase you want to delete the container, run:
 docker rm -f /my-fastapi-container
 ```
+
+IMPORTANT NOTE FOR RUNNING DOCKER LOCALLY ON MAC: 
+https://i.sstatic.net/fJ6VG.png
+If the container fails due to the local machines MacOS, try:
+Settings -> Features in development -> Check "Use Rosetta for x86/amd64 emulation on Apple Silicon"
+
+I was unable to build the image locally until I made this configuration update. 
 
 ## Deploying on Cloud Run
 
