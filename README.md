@@ -410,12 +410,5 @@ A few important things to consider along the way:
 - If the cost for OpenAI is based on the time to receive a response, than the unpredictable and slower response times actually brings the cost of the self hosted GCP API much closer to the OpenAI API, where the cost of this experiment on GCP cost 0.004898 dollars and for OpenAI it cost 0.004385 dollars. 
 - Make sure to consider the memory limits of GCP Cloud Run. For example, if you would like to deploy an LLM using cloud run, it may or may not have enough memory given that the max is 32Gi.
 
-
-
-
-
-
-
-
-
-
+## TODO
+- Quantize the whisper STT model for even faster response times. 
