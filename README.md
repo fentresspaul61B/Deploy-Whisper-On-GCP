@@ -400,6 +400,12 @@ Q: "If I do not use the GPU all the time, or have a relatively low traffic, as I
 
 A: "(No) ... Once your quota has been adjusted, it will not decrease nor you will lose access to this. However, it will only affect your future quota increase request with these APIs as our engineers also consider your utilization rate to their evaluation."
 
+## Benchmarking/ Timing the API
+Next I wanted to check how long each of the steps within the API take at inference time. So I set up timers for each step in the translation process. 
+
+After setting up timing, I want to switch to test out Faster Whisper, and then add the same timers. 
+
+
 # Conclusion
 Overall, my experience deploying Whisper as an API using GCP Cloud Run with a GPU was not too painful. 
 
@@ -412,3 +418,4 @@ A few important things to consider along the way:
 
 ## TODO
 - Quantize the whisper STT model for even faster response times. 
+
