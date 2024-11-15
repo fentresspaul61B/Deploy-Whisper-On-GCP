@@ -65,36 +65,36 @@ async def check_model_in_memory():
 
 @app.post("/translate/")
 async def translate(file: UploadFile = File(...)):
-    result = {}
+    response = {}
 
     s = time.time()
     temp_filepath = save_upload_file_to_temp(file)
     e = time.time()
-    result["temp_file_time"] = e - s
+    response["temp_file_time"] = e - s
 
     try:
         s = time.time()
         audio = whisper.load_audio(temp_filepath)
         e = time.time()
-        result["load_audio_time"] = e - s
+        response["load_audio_time"] = e - s
 
         s = time.time()
         audio = whisper.pad_or_trim(audio)
         e = time.time()
-        result["pad_audio_time"] = e - s
+        response["pad_audio_time"] = e - s
 
         s = time.time()
         mel = whisper.log_mel_spectrogram(
             audio, n_mels=NUM_MELS).to(MODEL.device)
         e = time.time()
-        result["compute_mel_features_time"] = e - s
+        response["compute_mel_features_time"] = e - s
 
         s = time.time()
         result = whisper.decode(MODEL, mel)
         e = time.time()
-        result["inference_time"] = e - s
+        response["inference_time"] = e - s
     finally:
         os.remove(temp_filepath)
-    result["text"] = result.text
-    result["language"] = result.language
-    return result
+    response["text"] = result.text
+    response["language"] = result.language
+    return response
