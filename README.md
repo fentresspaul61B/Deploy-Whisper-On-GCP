@@ -311,7 +311,7 @@ Also can check GPU and FFMPEG endpoints
 ### Creating GitHub Actions Workflow for deployment
 https://cloud.google.com/run/docs/configuring/services/gpu#gcloud
 
-- Go to cloud run admin API
+- Go to cloud run admin API: https://console.cloud.google.com/marketplace/product/google/run.googleapis.com?q=search&referrer=search&project=devaworld-282317
 - Go to Quotas and system limits
 - Search for "Total Nvidia L4 GPU allocation, per project per region" and find your region
 - Click the box
