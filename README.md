@@ -77,7 +77,7 @@ First I will start by making a simple endpoint which is only used to upload audi
 
 ### Install Fast API
 ```
-pip install fastapi 
+pip install "fastapi[standard]" 
 
 pip install uvicorn 
 
