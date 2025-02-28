@@ -1,9 +1,9 @@
 name: Deploy to Cloud Run (WITH GPU)
 
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 env:
