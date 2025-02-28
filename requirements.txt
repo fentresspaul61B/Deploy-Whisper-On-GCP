@@ -3,3 +3,4 @@ fastapi[standard]
 uvicorn
 openai-whisper
 torch
+numpy
