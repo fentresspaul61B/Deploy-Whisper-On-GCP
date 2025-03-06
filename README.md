@@ -423,5 +423,19 @@ A few important things to consider along the way:
 - Make sure to consider the memory limits of GCP Cloud Run. For example, if you would like to deploy an LLM using cloud run, it may or may not have enough memory given that the max is 32Gi.
 
 ## TODO
-- Quantize the whisper STT model for even faster response times. 
+- Quantize the whisper STT model for even faster response times.
+
+
+# Errors
+```bash
+zsh: segmentation fault  pip3 install -r requirements.txt
+```
+If you run into an error like the one above while trying to use pip on MacOS. Follow these steps:
+
+```bash
+
+```
+
+
+Then follow these steps
 
