@@ -24,13 +24,19 @@ This documentation is a WIP!
 ## Steps
 
 ### Create new python venv
-    ```
-    pyenv local 3.10.0
+```bash
+pyenv local 3.10.0
 
-    python -m venv venv
+python -m venv venv
 
-    source venv/bin/activate
-    ```
+source venv/bin/activate
+```
+
+In order to install a different version of python, run:
+```bash
+# add the relevant version
+pyenv install 3.__.__
+```
 
 ### Install the whisper package (need to read through source code, to verify if data is being stored, and check if it can run offline)
     ```
