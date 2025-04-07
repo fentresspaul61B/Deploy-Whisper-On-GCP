@@ -12,7 +12,7 @@ import time
 # 'tiny.en', 'tiny', 'base.en', 'base', 'small.en',
 # 'small', 'medium.en', 'medium', 'large-v1', 'large-v2',
 # 'large-v3', 'large', 'large-v3-turbo', 'turbo'
-MODEL_VERSION = "large-v2"
+MODEL_VERSION = "large-v3-turbo"
 
 # V3 models require 128 mel, other models like the tiny model require 80 mels
 NUM_MELS = 128
