@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN mkdir models
 
 # Download the Whisper model during the build
-ENV MODEL_VERSION=large-v2
+ENV MODEL_VERSION=large-v3-turbo
 RUN mkdir -p /app/models && \
     python -c "import whisper; whisper.load_model('$MODEL_VERSION', download_root='/app/models')"
 
