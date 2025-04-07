@@ -437,5 +437,5 @@ If you run into an error like the one above while trying to use pip on MacOS. Fo
 ```
 
 
-Then follow these steps
+Then follow these steps.
 
